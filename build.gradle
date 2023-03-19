@@ -2,7 +2,7 @@ plugins {
     id 'java'
 }
 
-group = 'com.pixel4r.plugin.enderice.fishermanfriend'
+group = 'com.pixel4r.plugin.enderice.fishingoverhaul'
 version = '1.0'
 
 repositories {
