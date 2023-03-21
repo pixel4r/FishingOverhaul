@@ -1,16 +1,15 @@
 package com.pixel4r.plugin.enderice.fishingoverhaul.fishingoverhaul.listeners;
 
 import com.pixel4r.plugin.enderice.fishingoverhaul.fishingoverhaul.utils.MathUtils;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.FishHook;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerFishEvent;
 
+import java.util.Random;
+
 public class FishingEvents implements Listener {
     public static FishHook HOOK_ENTITY;
-    public static Entity CAUGHT_ENTITY = null;
     public static double SUCCESS_RATE = 0;
 
     public FishingEvents () {
@@ -38,7 +37,7 @@ public class FishingEvents implements Listener {
 
                 } else {
                     SUCCESS_RATE = 0;
-                    player.getLocation().getWorld().spawnEntity(player.getLocation(), CAUGHT_ENTITY.getType());
+                    HOOK_ENTITY.eject();
                 }
             }
             case FISHING -> {
@@ -46,8 +45,11 @@ public class FishingEvents implements Listener {
             }
             case BITE -> {
                 player.sendMessage("BITE!");
-                CAUGHT_ENTITY = event.getCaught();
-                SUCCESS_RATE += 35;
+                SUCCESS_RATE += MathUtils.randDouble(30, 35);;
+
+                if (HOOK_ENTITY.getPassengers().size() > 0) return;
+                Entity entity = HOOK_ENTITY.getLocation().getWorld().spawnEntity(HOOK_ENTITY.getLocation(), randomCaughtableEntity());
+                HOOK_ENTITY.addPassenger(entity);
             }
             case CAUGHT_FISH -> {
                 player.sendMessage("CAUGHT_FISH!");
@@ -55,12 +57,21 @@ public class FishingEvents implements Listener {
             }
             case FAILED_ATTEMPT -> {
                 player.sendMessage("FAILED_ATTEMPT");
-                CAUGHT_ENTITY = null;
-                SUCCESS_RATE -= 25;
+                SUCCESS_RATE -= MathUtils.randDouble(20, 25);;
             }
         }
-
-        if (CAUGHT_ENTITY != null) player.sendMessage(CAUGHT_ENTITY.getType().translationKey());
-
     }
+
+    private static EntityType randomCaughtableEntity() {
+        EntityType[] entities = {
+                EntityType.TROPICAL_FISH,
+                EntityType.SALMON,
+                EntityType.COD,
+                EntityType.PUFFERFISH,
+        };
+
+        int rnd = new Random().nextInt(entities.length);
+        return entities[rnd];
+    }
+
 }
